@@ -1,6 +1,6 @@
 # Xiangqi Pygame Project
 
-三人组：mx； wyf; wty。目标是按照“规则内核 core + UI + AI”分层，先实现控制台骨架、再升级到 Pygame 交互，最后引入 AI。
+三人组：mx； wyf; wty。目标是按照“规则内核 core + UI + AI”分层，先实现骨架、再升级到 Pygame 交互，最后引入 AI。
 
 ## 工作空间布局
 
@@ -8,7 +8,6 @@
 Course/SoftEngineer/
 	.python-version         # uv 管理的 Python 版本配置
 	README.md              # 本文档
-	main.py                # 早期 CLI 骨架（可删或留作快速测试）
 	pyproject.toml         # uv/poetry 依赖配置
 	uv.lock                # uv 环境锁文件
 	cn_chess/              # uv 创建的虚拟环境（已经在 .gitignore）
@@ -52,7 +51,7 @@ xiangqi/
 ## 合作流程 & Git 指南
 
 1. 先从 `main` 拉最新（`git fetch origin && git switch feature/<name> && git rebase origin/main` 或 `merge`），每人保留主题分支（例 `feature/cannon`, `feature/ui-draft`）。
-2. 功能完成后推送自己的 `feature/...` 分支并在 GitHub 开 PR，目标分支为 `main`。若确有需要整合多个功能，可以在另一台机（或用 `fix` 分支）做 `git merge origin/main --allow-unrelated-histories`，但需先解决冲突，再推 PR。
+2. 功能完成后推送自己的 `feature/...` 分支并在 GitHub 开 PR，目标分支为 `main`。
 3. `main` 上禁止直接 `git push`（除非是 CI/受权操作）；所有变更都经 PR 审查合并。合入前先在本地 `git switch main && git pull origin main` 保持同步。
 
 ## 约定与提示
