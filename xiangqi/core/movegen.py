@@ -40,6 +40,21 @@ def gen_legal_moves(board: Board, side: Side) -> List[Move]:
 def _in_bounds(r: int, c: int) -> bool:
     return 0 <= r < BOARD_ROWS and 0 <= c < BOARD_COLS
 
+def _in_palace(r: int, c: int, side: Side) -> bool:
+    if side == Side.RED:
+        return 7 <= r <= 9 and 3 <= c <= 5
+    else:
+        return 0 <= r <= 2 and 3 <= c <= 5
+
+def _has_crossed_river(r: int, side: Side) -> bool:
+    if side == Side.RED:
+        return r < 5
+    else:
+        return r > 4
+
+def _in_own_side(r: int, side: Side) -> bool:
+    return (r >= 5) if side == Side.RED else (r <= 4)
+
 def _try_add(board: Board, side: Side, frm: int, to: int, moves: List[Move]) -> bool:
     target = board.piece_at(to)
     if target == 0:
@@ -65,9 +80,16 @@ def _gen_che(board: Board, pos: int, side: Side) -> List[Move]:
     return moves
 
 def _gen_ma(board: Board, pos: int, side: Side) -> List[Move]:
-    # TODO: 马走日 + 蹩马腿
-    # 提示：先定义8个(leg, to)组合：腿被占则该方向全废
-    return []
+    moves: List[Move] = []
+    r, c = i_to_rc(pos)
+    for dr, dc, lr, lc in [(-2,-1,-1,0),(-2,1,-1,0),(2,-1,1,0),(2,1,1,0),
+                           (-1,-2,0,-1),(-1,2,0,1),(1,-2,0,-1),(1,2,0,1)]:
+        rr, cc = r + dr, c + dc
+        lr, lc = r + lr, c + lc
+        if _in_bounds(rr, cc) and board.piece_at(rc_to_i(lr, lc)) == 0:
+            to = rc_to_i(rr, cc)
+            _try_add(board, side, pos, to, moves)
+    return moves
 
 def _gen_pao(board: Board, pos: int, side: Side) -> List[Move]:
     moves: List[Move] = []
@@ -96,17 +118,52 @@ def _gen_pao(board: Board, pos: int, side: Side) -> List[Move]:
     return moves
 
 def _gen_bing(board: Board, pos: int, side: Side) -> List[Move]:
-    # TODO: 兵/卒：未过河只能前，过河可左右，不能后退
-    return []
+    moves: List[Move] = []
+    r, c = i_to_rc(pos)
+    forward = -1 if side == Side.RED else 1
+    # 未过河
+    rr, cc = r + forward, c
+    if _in_bounds(rr, cc):
+        to = rc_to_i(rr, cc)
+        _try_add(board, side, pos, to, moves)
+
+    # 过河后可左右
+    if _has_crossed_river(r, side):
+        for dc in [-1, 1]:
+            rr, cc = r, c + dc
+            if _in_bounds(rr, cc):
+                to = rc_to_i(rr, cc)
+                _try_add(board, side, pos, to, moves)
+    return moves
 
 def _gen_shuai(board: Board, pos: int, side: Side) -> List[Move]:
-    # TODO: 将/帅：九宫内一步；并考虑照面（可在 rules 里统一过滤）
-    return []
+    moves: List[Move] = []
+    r, c = i_to_rc(pos)
+    for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:
+        rr, cc = r + dr, c + dc
+        if _in_bounds(rr, cc) and _in_palace(rr, cc, side):
+            to = rc_to_i(rr, cc)
+            _try_add(board, side, pos, to, moves)
+    return moves
 
 def _gen_shi(board: Board, pos: int, side: Side) -> List[Move]:
-    # TODO: 士/仕：九宫内斜一步
-    return []
+    moves: List[Move] = []
+    r, c = i_to_rc(pos)
+    for dr, dc in [(-1,-1),(-1,1),(1,-1),(1,1)]:
+        rr, cc = r + dr, c + dc
+        if _in_bounds(rr, cc) and _in_palace(rr, cc, side):
+            to = rc_to_i(rr, cc)
+            _try_add(board, side, pos, to, moves)
+    return moves
 
 def _gen_xiang(board: Board, pos: int, side: Side) -> List[Move]:
-    # TODO: 象/相：田字，塞象眼，不能过河
-    return []
+    moves = []
+    r, c = i_to_rc(pos)
+
+    for dr, dc, lr, lc in [(-2,-2,-1,-1),(-2,2,-1,1),(2,-2,1,-1),(2,2,1,1)]:
+        rr, cc = r + dr, c + dc
+        lr, lc= r + lr, c + lc
+        if (_in_own_side(rr, side) and _in_bounds(rr, cc) and board.piece_at(rc_to_i(lr, lc)) == 0):
+            to = rc_to_i(rr, cc)
+            _try_add(board, side, pos, to, moves)
+    return moves
