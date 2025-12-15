@@ -62,6 +62,8 @@ xiangqi/
 
 ## 计划
 
-建议自己写代码；参考仓库：[js实现中国象棋](https://github.com/itlwei/Chess/blob/master/js/common.js)
+建议自己写代码；
+参考仓库：[js实现中国象棋](https://github.com/itlwei/Chess/blob/master/js/common.js)
+        [chessAI](https://github.com/yuqangy123/chessAI/tree/main)
 - 重在练习协作，团队一起推进。
 - 具体的 uv 教程/ git 操作可参考官方文档或 AI 工具中的指南；需要时可以在群里共享链接。
