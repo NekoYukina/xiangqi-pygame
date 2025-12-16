@@ -26,8 +26,8 @@ class AssetManager:
             black_path = base_path / f"{black_filename}.png"
             self.piece_images[piece_code] = pygame.image.load(str(red_path))
             self.piece_images[-piece_code] = pygame.image.load(str(black_path))
-        self.menu_bg = pygame.image.load(str(base_path / "bg.jpg"))
-        self.bg = pygame.image.load(str(base_path / "bg.png"))
+        self.bg = pygame.image.load(str(base_path / "bg.jpg"))
+        self.board_bg = pygame.image.load(str(base_path / "bg.png"))
         self.red_box = pygame.image.load(str(base_path / "r_box.png"))
         self.black_box = pygame.image.load(str(base_path / "b_box.png"))
         self.dot = pygame.image.load(str(base_path / "dot.png"))

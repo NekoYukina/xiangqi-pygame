@@ -29,7 +29,7 @@ class MenuScene(Scene):
                 self.game.change_scene(PlayScene(self.game), mode=modes[self.selected_mode])
 
     def draw(self, screen: pygame.Surface):
-        bg = self.game.assets.menu_bg
+        bg = self.game.assets.bg
         screen_w, screen_h = screen.get_size()
         bg_w, bg_h = bg.get_size()
 
