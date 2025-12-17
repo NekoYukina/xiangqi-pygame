@@ -2,11 +2,13 @@ import pygame
 from .scenes import Scene
 from .game_config import GAME_WIDTH, GAME_HEIGHT
 from pathlib import Path
+from .playscene import PlayScene
 
 class MenuScene(Scene):
+    from .playscene import PlayScene
     def on_enter(self, **kwards):
         self.selected_mode = 0 # 0: 人机； 1: 换边； 2: 挑战棋局
-
+        self.modes = ["HUMAN_VS_AI", "CHANGE_SIDE", "CHESS_CHALLENGE"]
         base_path = Path(__file__).parent.parent / 'assets' / 'img'
         self.init_bg = pygame.image.load(str(base_path / 'init_bg.png'))
         self.btn_bg = pygame.image.load(str(base_path / 'btn_bg.png'))
@@ -24,9 +26,22 @@ class MenuScene(Scene):
             elif event.key == pygame.K_3:
                 self.selected_mode = 2
             elif event.key == pygame.K_RETURN:
-                modes = ["HUMAN_VS_AI", "CHANGE_SIDE", "CHESS_CHALLENGE"]
-                from .playscene import PlayScene
-                self.game.change_scene(PlayScene(self.game), mode=modes[self.selected_mode])
+                self.game.change_scene(PlayScene(self.game), mode=self.modes[self.selected_mode])
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            x, y = event.pos
+            print(f"Clicked on x={x}, y={y}")
+            screen_w, screen_h = self.game.screen.get_size()
+            init_bg_x = (screen_w - self.init_bg.get_width()) // 2
+            init_bg_y = (screen_h - self.init_bg.get_height()) // 2
+            menu_items = ["人机对弈", "换边对战", "挑战棋局"]
+            start_y = init_bg_y + 180
+            for mode, text in enumerate(menu_items):
+                btn_x = init_bg_x + 50
+                btn_rect = pygame.Rect(btn_x, start_y, self.btn_bg.get_width(), self.btn_bg.get_height())
+                if btn_rect.collidepoint(x, y):
+                    self.game.change_scene(PlayScene(self.game), mode=self.modes[self.selected_mode])
+                    start_y += 80
+
 
     def draw(self, screen: pygame.Surface):
         bg = self.game.assets.bg
