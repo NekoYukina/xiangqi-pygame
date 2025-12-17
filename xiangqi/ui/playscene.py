@@ -1,7 +1,7 @@
 from xiangqi.core.board import Board
 from .scenes import Scene
 import pygame
-from xiangqi.core.const import rc_to_i, side_of
+from xiangqi.core.const import rc_to_i, side_of, i_to_rc
 from xiangqi.core.movegen import gen_legal_moves
 from xiangqi.core.move import Move
 class PlayScene(Scene):
@@ -12,32 +12,46 @@ class PlayScene(Scene):
         self.cand_moves = []
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            rc = self.pixel_to_rc(event.pos) or (None, None)
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            rc = self.pixel_to_rc(event.pos)
             if rc is None:
                 self.selected = None
                 self.cand_moves = []
                 return
 
             row, col = rc
+            to = rc_to_i(row, col)
             # 调试用
             print(f"Clicked on row={row}, col={col}")
-            self.last_click_rc = (row, col)
-            frm = rc_to_i(row, col)
-            piece = self.board.squares[frm]
+            piece_to = self.board.squares[to]
 
-            if piece != 0 and side_of(piece) == self.board.side_to_move:
-                self.selected = (row, col)
-                self.cand_moves = gen_legal_moves(self.board, self.board.side_to_move)
-                self.cand_moves = [mv for mv in self.cand_moves if mv.frm == frm] # 只保留该选中棋子的走法
-                return
-            elif self.selected is not None:
-                to = rc_to_i(row, col)
+            if self.selected is not None:
                 move = next((mv for mv in self.cand_moves if mv.to == to), None)
                 if move is not None:
                     self.board.make_move(move)
                     self.selected = None
                     self.cand_moves = []
+                    return
+
+                if piece_to == 0:
+                    self.selected = None
+                    self.cand_moves = []
+                    return
+
+            piece = piece_to
+            if piece != 0 and side_of(piece) == self.board.side_to_move:
+                frm = to
+                self.selected = (row, col)
+                allmoves = gen_legal_moves(self.board, self.board.side_to_move)
+                self.cand_moves = [mv for mv in allmoves if mv.frm == frm] # 只保留该选中棋子的走法
+                return
+
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+            if self.board.move_stack:
+                self.board.undo_move()
+                self.selected = None
+                self.cand_moves = []
 
 
     def draw(self, screen: pygame.Surface):
@@ -124,7 +138,7 @@ class PlayScene(Scene):
         dot_scaled = pygame.transform.smoothscale(dot_img, (dot_size, dot_size))
 
         for mv in self.cand_moves:
-            to_row, to_col = divmod(mv.to, 9)
+            to_row, to_col = i_to_rc(mv.to)
             x, y = self.rc_to_pixel(to_row, to_col)
             rect = dot_scaled.get_rect(center=(x, y))
             screen.blit(dot_scaled, rect)
