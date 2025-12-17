@@ -19,7 +19,9 @@ Course/SoftEngineer/
 ```
 xiangqi/
 ├── main.py                # 游戏启动入口
+├── app.py                 # 应用主程序（备用入口）
 ├── core/                  # 棋盘、走法、规则逻辑
+│   ├── __init__.py
 │   ├── const.py          # 常数定义（Piece, Side 枚举、棋盘尺寸）
 │   ├── move.py           # Move 数据类（frm, to, moved_piece, captured）
 │   ├── board.py          # Board 棋盘（squares, side_to_move, move_stack）
@@ -27,6 +29,7 @@ xiangqi/
 │   └── rules.py          # 规则判断（in_check, is_checkmate, is_face_to_face）
 │
 ├── ui/                    # Pygame UI 框架（Scene 模式）
+│   ├── __init__.py
 │   ├── game.py           # Game 主类（主循环、场景管理）
 │   ├── game_config.py    # 游戏常数（800x900 窗口、80px 格子）
 │   ├── theme.py          # Theme 主题（3套风格：stype_1/2/3）
@@ -35,19 +38,27 @@ xiangqi/
 │   ├── menuscene.py      # MenuScene 菜单（选择游戏模式）
 │   └── playscene.py      # PlayScene 游戏场景（棋盘显示、选棋、移动）
 │
-├── ai/                    # AI 模块（待实现）
-│   └── __init__.py
+├── ai/                    # AI 模块（Zobrist、MiniMax 搜索）
+│   ├── __init__.py
+│   ├── eval.py           # 局面评估函数
+│   ├── search.py         # MiniMax 搜索算法
+│   └── zobrist.py        # Zobrist 哈希（置换表）
 │
 ├── assets/               # 资源文件
+│   ├── fonts/
+│   │   └── NotoSerifSC-Regular.otf    # 中文字体
 │   └── img/
 │       ├── init_bg.png          # 菜单背景框
 │       ├── btn_bg.png           # 菜单按钮
-│       ├── stype_1/             # 风格 1（棋子、棋盘、点标记）
+│       ├── btn_fh.png           # 返回按钮
+│       ├── stype_1/             # 风格 1（棋子、棋盘、点标记、选框）
 │       ├── stype_2/             # 风格 2
 │       └── stype_3/             # 风格 3
 │
-└── test/
-    └── test_play.py      # 测试脚本（跳过菜单直接进游戏）
+└── test/                 # 测试脚本
+    ├── test_play.py      # 跳过菜单直接进游戏
+    ├── test_menu.py      # 菜单测试
+    └── test_ui.py        # UI 测试
 ```
 
 ## 快速开始
@@ -153,3 +164,40 @@ python xiangqi/test/test_play.py
 - [JavaScript 象棋实现](https://github.com/itlwei/Chess)（菜单 UI 参考）
 - [chessAI 预训练模型](https://github.com/yuqangy123/chessAI)（AI 参考）
 - [Pygame 官方文档](https://www.pygame.org)
+
+## 开发笔记
+
+### 鼠标点击事件处理流程
+
+**PlayScene 中的选棋与移动逻辑**：
+1. `handle_event(MOUSEBUTTONDOWN)` 获取鼠标坐标
+2. `pixel_to_rc()` 转换屏幕坐标 → 棋盘坐标（使用 `round()` 四舍五入）
+3. 第一次点击：检测是否点击己方棋子，若是则生成该棋子的所有合法走法
+4. 第二次点击：检测目标位置是否在可走列表中，若是则执行 `board.make_move()`
+5. `rc_to_pixel()` 渲染时转换棋盘坐标 → 屏幕坐标（使用 `int()` 截断）
+
+**关键方法**：
+- `pixel_to_rc(pos)`：鼠标坐标 → 棋盘 (row, col)
+- `rc_to_pixel(row, col)`：棋盘坐标 → 屏幕像素坐标
+
+### 坐标系统
+
+- **棋盘格子**：10 行 × 9 列（0-索引）
+- **一维数组访问**：`index = row * 9 + col`
+- **反向转换**：`row, col = divmod(index, 9)`
+- **屏幕适配**：动态缩放 board_bg，通过 inset 比例（l/r/t/b）微调格子区域
+
+### 下一步建议
+
+1. **人机对战**（优先级高）
+   - 集成 AI 模块
+   - 实现 AI 回合逻辑
+
+2. **UI 完善**（优先级中）
+   - 游戏状态显示（当前轮、将军状态）
+   - 场景导航（返回菜单、重新开始）
+   - 移动历史显示
+
+3. **挑战模式**（优先级低）
+   - 预设局面库
+   - 赢/平局判定
