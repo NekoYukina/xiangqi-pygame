@@ -35,7 +35,7 @@ class MenuScene(Scene):
             init_bg_y = (screen_h - self.init_bg.get_height()) // 2
             menu_items = ["人机对弈", "换边对战", "挑战棋局"]
             start_y = init_bg_y + 180
-            for mode, text in enumerate(menu_items):
+            for _, _ in enumerate(menu_items):
                 btn_x = init_bg_x + 50
                 btn_rect = pygame.Rect(btn_x, start_y, self.btn_bg.get_width(), self.btn_bg.get_height())
                 if btn_rect.collidepoint(x, y):
