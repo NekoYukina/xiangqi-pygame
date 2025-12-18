@@ -4,6 +4,7 @@ import pygame
 from xiangqi.core.const import Side, rc_to_i, side_of, i_to_rc
 from xiangqi.core.movegen import gen_legal_moves
 from xiangqi.ai.search_v2 import SearchEngine
+from xiangqi.ai.search import find_best_move
 
 class PlayScene(Scene):
     def on_enter(self, **kwards):
@@ -37,7 +38,7 @@ class PlayScene(Scene):
                     if self.board.side_to_move == Side.BLACK:
                         black_moves = gen_legal_moves(self.board, Side.BLACK)
                         if black_moves:
-                            ai_move = self.search_engine.search(self.board, max_depth=4)
+                            ai_move = find_best_move(self.board, max_depth=4)
                             if ai_move is not None:
                                 self.board.make_move(ai_move)
                                 # print(f"AI made move: {ai_move}")

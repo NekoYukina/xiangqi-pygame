@@ -31,25 +31,37 @@ def minimax(board, depth, alpha, beta, is_red_turn):
                 break
         return min_eval
 
-def find_best_move(board, depth=3):
+def find_best_move(board, max_depth=3, time_limit=5.0):
     best_move = None
     is_red_turn = board.side_to_move == Side.RED
-    best_value = -INF if board.side_to_move == Side.RED else INF
+    start_time = time.time()
 
-    time_start = time.time()
+    for current_depth in range(1, max_depth + 1):
+        current_iter_best_move = None
+        alpha = -INF
+        beta = INF
+        moves = gen_legal_moves(board, board.side_to_move)
+        moves.sort(key=lambda m: abs(m.captured), reverse=True)
 
-    for move in gen_legal_moves(board, board.side_to_move):
-        board.make_move(move)
-        board_value = minimax(board, depth - 1, -INF, INF, board.side_to_move == Side.RED)
-        board.undo_move()
+        for move in moves:
+            if time.time() - start_time > time_limit:
+                break
+            board.make_move(move)
+            board_value = minimax(board, current_depth - 1, alpha, beta, board.side_to_move == Side.RED)
+            board.undo_move()
 
-        if board.side_to_move == Side.RED:
-            if board_value > best_value:
-                best_value = board_value
-                best_move = move
-        else:
-            if board_value < best_value:
-                best_value = board_value
-                best_move = move
+            if is_red_turn:
+                if board_value > alpha:
+                    alpha = board_value
+                    current_iter_best_move = move
+            else:
+                if board_value < beta:
+                    beta = board_value
+                    current_iter_best_move = move
+
+        if current_iter_best_move is not None:
+            best_move = current_iter_best_move
+        print(
+                f"深度 {current_depth} 完成 | 分数区间: {beta}-{alpha} | 最佳: {current_iter_best_move} | 耗时: {time.time() - start_time:.2f}s")
 
     return best_move
